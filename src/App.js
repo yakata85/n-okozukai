@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function App() {
   const [view, setView] = useState("home");
@@ -6,8 +7,36 @@ export default function App() {
     const saved = localStorage.getItem("records");
     return saved ? JSON.parse(saved) : [];
   });
-
   const [form, setForm] = useState({ name: "", date: "", item: "", amount: "", id: null });
+  const [authorized, setAuthorized] = useState(false);
+  const [inputKey, setInputKey] = useState("");
+  const ACCESS_KEY = "1415";
+
+  if (!authorized) {
+    return (
+      <div className="p-4 max-w-sm mx-auto text-center">
+        <h2 className="text-lg font-bold mb-2">永田家専用アクセスキー</h2>
+        <input
+          type="password"
+          value={inputKey}
+          onChange={(e) => setInputKey(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+        <button
+          onClick={() => {
+            if (inputKey === ACCESS_KEY) {
+              setAuthorized(true);
+            } else {
+              alert("アクセスキーが違います");
+            }
+          }}
+          className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"
+        >
+          送信
+        </button>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -60,6 +89,9 @@ export default function App() {
   const totalByMonth = getTotalByMonth();
   const nameOptions = ["ママ", "パパ", "はやと", "いちか"];
 
+  const chartDataByName = Object.entries(totalByName).map(([name, total]) => ({ name, total }));
+  const chartDataByMonth = Object.entries(totalByMonth).map(([month, total]) => ({ name: month, total }));
+
   return (
     <div className="max-w-md mx-auto p-4 text-sm">
       <h1 className="text-xl font-bold mb-4 text-center">永田家小遣い帳</h1>
@@ -98,12 +130,31 @@ export default function App() {
                 <li key={name}>{name}：{total.toLocaleString()}円</li>
               ))}
             </ul>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartDataByName}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="total" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+
             <h2 className="font-bold mt-3 mb-1">月別 合計</h2>
             <ul>
               {Object.entries(totalByMonth).map(([month, total]) => (
                 <li key={month}>{month}：{total.toLocaleString()}円</li>
               ))}
             </ul>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartDataByMonth}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="total" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
           {records.length === 0 ? (
