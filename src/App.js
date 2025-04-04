@@ -16,7 +16,7 @@ import {
 export default function App() {
   const [view, setView] = useState("home");
   const [records, setRecords] = useState([]);
-  const [form, setForm] = useState({ name: "", date: "", item: "", amount: "", id: null });
+  const [form, setForm] = useState({ name: "", date: "", item: "", amount: "", method: "", id: null });
   const [authorized, setAuthorized] = useState(false);
   const [inputKey, setInputKey] = useState("");
   const ACCESS_KEY = "1415";
@@ -54,7 +54,7 @@ export default function App() {
     } else {
       await addDoc(recordsCollection, form);
     }
-    setForm({ name: "", date: "", item: "", amount: "", id: null });
+    setForm({ name: "", date: "", item: "", amount: "", method: "", id: null });
     setView("home");
   };
 
@@ -158,6 +158,12 @@ export default function App() {
           <input name="date" value={form.date} onChange={handleChange} required type="date" className="border p-3 rounded text-black" />
           <input name="item" value={form.item} onChange={handleChange} required placeholder="使った内容" className="border p-3 rounded text-black" />
           <input name="amount" value={form.amount} onChange={handleChange} required type="number" placeholder="金額" className="border p-3 rounded text-black" />
+          <select name="method" value={form.method} onChange={handleChange} required className="border p-3 rounded text-black">
+            <option value="">支払い方法を選択</option>
+            <option value="現金">現金</option>
+            <option value="PayPay">PayPay</option>
+            <option value="楽天Pay">楽天Pay</option>
+          </select>
           <button type="submit" className="bg-green-500 text-white py-3 rounded-xl text-lg">保存</button>
           <button onClick={() => setView("home")} type="button" className="text-sm text-gray-400 mt-2">戻る</button>
         </form>
@@ -174,7 +180,7 @@ export default function App() {
             <ul className="space-y-3">
               {recordsOnSelectedDate.map((r) => (
                 <li key={r.id} className="border border-gray-700 p-3 rounded-xl">
-                  <div><strong>{r.name}</strong>：{r.item}</div>
+                  <div><strong>{r.name}</strong>：{r.item}（{r.method}）</div>
                   <div>{r.date} / {Number(r.amount).toLocaleString()}円</div>
                 </li>
               ))}
@@ -236,7 +242,7 @@ export default function App() {
             <ul className="space-y-3">
               {filteredRecords.map((r) => (
                 <li key={r.id} className="border border-gray-700 p-3 rounded-xl">
-                  <div><strong>{r.name}</strong>：{r.item}</div>
+                  <div><strong>{r.name}</strong>：{r.item}（{r.method}）</div>
                   <div>{r.date} / {Number(r.amount).toLocaleString()}円</div>
                   <div className="flex gap-3 mt-2">
                     <button onClick={() => handleEdit(r)} className="text-blue-400 text-sm">編集</button>
