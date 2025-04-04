@@ -1,16 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { db } from "./firebase";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from "firebase/firestore";
 
 export default function App() {
   const [view, setView] = useState("home");
-  const [records, setRecords] = useState(() => {
-    const saved = localStorage.getItem("records");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [records, setRecords] = useState([]);
   const [form, setForm] = useState({ name: "", date: "", item: "", amount: "", id: null });
   const [authorized, setAuthorized] = useState(false);
   const [inputKey, setInputKey] = useState("");
   const ACCESS_KEY = "1415";
+
+  const recordsCollection = collection(db, "records");
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(recordsCollection, (snapshot) => {
+      const result = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setRecords(result);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (!authorized) {
     return (
@@ -42,17 +58,14 @@ export default function App() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let updated;
     if (form.id) {
-      updated = records.map(r => r.id === form.id ? form : r);
+      const ref = doc(db, "records", form.id);
+      await updateDoc(ref, form);
     } else {
-      const newRecord = { ...form, id: Date.now() };
-      updated = [newRecord, ...records];
+      await addDoc(recordsCollection, form);
     }
-    setRecords(updated);
-    localStorage.setItem("records", JSON.stringify(updated));
     setForm({ name: "", date: "", item: "", amount: "", id: null });
     setView("home");
   };
@@ -62,10 +75,8 @@ export default function App() {
     setView("add");
   };
 
-  const handleDelete = (id) => {
-    const updated = records.filter(r => r.id !== id);
-    setRecords(updated);
-    localStorage.setItem("records", JSON.stringify(updated));
+  const handleDelete = async (id) => {
+    await deleteDoc(doc(db, "records", id));
   };
 
   const getTotalByName = () => {
