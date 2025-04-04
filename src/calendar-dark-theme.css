@@ -1,0 +1,26 @@
+
+/* カレンダーのダークテーマ対応 */
+.react-calendar {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.react-calendar__tile--now {
+  background: #444 !important;
+  color: #fff !important;
+}
+
+.react-calendar__tile--active {
+  background: #4a90e2 !important;
+  color: #fff !important;
+}
+
+.react-calendar__navigation button {
+  color: #fff;
+}
+
+.react-calendar__month-view__weekdays {
+  color: #aaa;
+}
